@@ -3,16 +3,27 @@ import os
 
 
 class FileUtility:
-    def __init__(self, file_location):
-        self._fileReader = self.__get_readable_file_pointer(file_location)
-
-    def __get_readable_file_pointer(self, file_location):
-        if not os.path.exists(file_location) and not os.path.isfile(file_location):
-            LogUtility.write_warning('file-processing.log', "File '{}' does not exist to read.".format(file_location))
-            raise Exception("'{}' is not exists".format(file_location))
+    @staticmethod
+    def __get_readable_file_pointer(file_location):
         try:
-            return open(file_location, 'r')
+            if not os.path.exists(file_location) and not os.path.isfile(file_location):
+                LogUtility.write_warning('file-processing.log',
+                                         "File '{}' does not exist to read.".format(file_location))
+                raise Exception("'{}' is not exists".format(file_location))
+
+            return open(file_location, 'r', encoding='utf8')
         except Exception as ex:
-            LogUtility.write_error('file-processing.log',
-                                  "Exception occurred, while reading file `{}` (->on FileHandler=>setFilePointer()<-) : {}".format(file_location, str(ex)))
+            LogUtility.write_error('file-util.log',
+                                   "Exception occurred, while reading file `{}` (->on FileHandler=>__get_readable_file_pointer()<-) : {}".format(
+                                       file_location, str(ex)))
             raise Exception("could not able to read file `{}`".format(file_location))
+
+    @staticmethod
+    def get_file_content_as_list(file_location):
+        try:
+            return FileUtility.__get_readable_file_pointer(file_location).read().splitlines()
+        except Exception as ex:
+            LogUtility.write_error('file-util.log',
+                                   "Exception occurred, while reading file `{}` (->on FileHandler=>get_file_content_as_list()<-) : {}".format(
+                                       file_location, str(ex)))
+            raise Exception("could not able to read and get file `{}` as list".format(file_location))
